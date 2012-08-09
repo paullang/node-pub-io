@@ -13,7 +13,14 @@ app.get('/recommendations/1', function(req, res) {
 });
 
 app.get('/recommendations/', function(request, response) {
-	response.send( getRecommendations() );
+	var cb = request.query.callback;
+	var isCallback = cb != undefined & cb != ""; 
+	if(isCallback) {
+		var results = cb + "(" + JSON.stringify(getRecommendations()) + ");";
+		response.send(results);
+	} else {
+		response.send( getRecommendations() );
+	}
 });
 
 function getRecommendations() {
