@@ -27,8 +27,9 @@ function getRecommendations() {
 
 	return {
 		"recommendations": [
-				{"user" : "joel", "value" : "#London2012"},
-				{"user" : "paul", "value" : "#TeamUSA"},
+				{"user" : "Paul", "value" : "#Olympics"},
+				{"user" : "Andrew", "value" : "#London2012"},
+				{"user" : "Lang", "value" : "#TeamUSA"},
 				{"user" : "@MarsCuriosity", "value" : "#MSL"}
 		]
 	};
