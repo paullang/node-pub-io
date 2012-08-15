@@ -1,26 +1,14 @@
 var express = require('express');
 
 var app = express.createServer(express.logger());
+app.enable('jsonp callback');
 
 app.get('/recommendations/1', function(req, res) {
-	/*
-	var r = getRecommendations().recommendations;
-	var id = req.params.id;
-	var idx = Integer.parseInt(id >= 0 && id < r.length ? id : 0);
-	res.send( r[id] );
-	*/
-	res.send(getRecommendations().recommendations[1])
+	res.send(getRecommendations().recommendations[1]);
 });
 
-app.get('/recommendations/', function(request, response) {
-	var cb = request.query.callback;
-	var isCallback = cb != undefined & cb != ""; 
-	if(isCallback) {
-		var results = cb + "(" + JSON.stringify(getRecommendations()) + ");";
-		response.send(results);
-	} else {
-		response.send( getRecommendations() );
-	}
+app.get('/recommendations/', function(req, res) {
+	res.send( getRecommendations() );
 });
 
 function getRecommendations() {
