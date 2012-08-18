@@ -3,8 +3,8 @@ var express = require('express');
 var app = express.createServer(express.logger());
 app.enable('jsonp callback');
 
-app.get('/recommendations/1', function(req, res) {
-	res.send(getRecommendations().recommendations[1]);
+app.get('/recommendations/:id', function(req, res) {
+	res.send(getRecommendations().recommendations[req.params.id]);
 });
 
 app.get('/recommendations/', function(req, res) {
@@ -12,7 +12,6 @@ app.get('/recommendations/', function(req, res) {
 });
 
 function getRecommendations() {
-
 	return {
 		"recommendations": [
 				{"user" : "Paul", "value" : "#Olympics"},
@@ -21,7 +20,6 @@ function getRecommendations() {
 				{"user" : "@MarsCuriosity", "value" : "#MSL"}
 		]
 	};
-	
 }
 
 app.post('/recommended', function(request,response) {
