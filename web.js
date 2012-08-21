@@ -26,13 +26,13 @@ app.get('/recommendations/', function(req, res) {
 app.post('/recommended', function(req,res) {
 	var lastRecommendation = req.body;
 	// TODO: Validate input from client
-	client.set("lastRecommended", lastRecommendation, function(err, reply) {
+	redis.set("lastRecommended", lastRecommendation, function(err, reply) {
 	    res.send(reply);
 	});
 });
 
 app.get('/recommended', function(req,res) {
-	client.get("lastRecommended", function(err, reply) {
+	redis.get("lastRecommended", function(err, reply) {
 	    res.send(reply + err);
 	});
 });
