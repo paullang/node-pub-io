@@ -23,15 +23,15 @@ app.get('/recommendations/', function(req, res) {
 	res.send( getRecommendations() );
 });
 
-app.post('/recommended', function(req,res) {
+app.post('/recommended/', function(req,res) {
 	var lastRecommendation = req.body;
 	// TODO: Validate input from client
 	redis.set("lastRecommended", lastRecommendation, function(err, reply) {
-	    res.send(reply);
+	    res.send(reply + ": set lastRecommended \"" + lastRecommendation + "\"");
 	});
 });
 
-app.get('/recommended', function(req,res) {
+app.get('/recommended/', function(req,res) {
 	redis.get("lastRecommended", function(err, reply) {
 	    res.send(reply + err);
 	});
