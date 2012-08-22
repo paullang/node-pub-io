@@ -2,6 +2,7 @@
 var express = require('express');
 var app = express.createServer(express.logger());
 app.enable('jsonp callback');
+app.use(express.bodyParser());
 
 
 // Redis initialization
@@ -24,22 +25,23 @@ app.get('/recommendations/', function(req, res) {
 });
 
 app.post('/recommended/', function(req,res) {
-	var lastRecommendation = req.param('recommendation');
+	var lastRecommendation = req.body.recommendation;
 	// TODO: Validate input from client
 	redis.set("lastRecommended", lastRecommendation, function(err, reply) {
-	    res.send(reply + ": set lastRecommended \"" + lastRecommendation + "\"");
+	    res.send(reply);
 	});
 });
 
 app.get('/recommended/', function(req,res) {
 	redis.get("lastRecommended", function(err, reply) {
-	    res.send(reply + err);
+	    res.send(reply);
 	});
 });
 
 app.get('/test.html',function(req, res) {
 	res.sendfile('test.html');
 });
+
 
 // Helpers
 function getRecommendations() {
