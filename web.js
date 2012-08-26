@@ -16,24 +16,27 @@ if (process.env.REDISTOGO_URL) {
 
 
 // Routes
-app.get('/recommendations/:id', function(req, res) {
-	res.send(getRecommendations().recommendations[req.params.id]);
-});
-
 app.get('/recommendations/', function(req, res) {
-	res.send( getRecommendations() );
+    redis.lrange("recommendations", 0, 10, function(err, items) {
+        var json = { "recommendations": [] };
+        var r = json.recommendations;
+        items.forEach(function (item) {
+            r.push({"value": item});
+        });
+        res.send(json);
+    });
 });
 
 app.post('/recommended/', function(req,res) {
 	var lastRecommendation = req.body.recommendation;
 	// TODO: Validate input from client
-	redis.set("lastRecommended", lastRecommendation, function(err, reply) {
+	redis.lpush("recommendations", lastRecommendation, function(err, reply) {
 	    res.send(reply);
 	});
 });
 
 app.get('/recommended/', function(req,res) {
-	redis.get("lastRecommended", function(err, reply) {
+	redis.lindex("recommendations", 0, function(err, reply) {
 	    res.send(reply);
 	});
 });
@@ -41,19 +44,6 @@ app.get('/recommended/', function(req,res) {
 app.get('/test.html',function(req, res) {
 	res.sendfile('test.html');
 });
-
-
-// Helpers
-function getRecommendations() {
-	return {
-		"recommendations": [
-                            {"user" : "Paul", "value" : "#Olympics"},
-                            {"user" : "Andrew", "value" : "#London2012"},
-                            {"user" : "Lang", "value" : "#TeamUSA"},
-                            {"user" : "@MarsCuriosity", "value" : "#MSL"}
-                            ]
-	};
-}
 
 
 // Server
