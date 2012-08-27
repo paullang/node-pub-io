@@ -17,7 +17,7 @@ if (process.env.REDISTOGO_URL) {
 
 // Routes
 app.get('/recommendations/', function(req, res) {
-    redis.lrange("recommendations", 0, 10, function(err, items) {
+    redis.lrange("recommendations", 0, 9, function(err, items) {
         var json = { "recommendations": [] };
         var r = json.recommendations;
         items.forEach(function (item) {
