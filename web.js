@@ -16,33 +16,41 @@ if (process.env.REDISTOGO_URL) {
 
 
 // Routes
+
+// Gets a list of the last 10 recommendations
 app.get('/recommendations/', function(req, res) {
     redis.lrange("recommendations", 0, 9, function(err, items) {
         var json = { "recommendations": [] };
-        var r = json.recommendations;
         items.forEach(function (item) {
-            r.push({"value": item});
+            json.recommendations.push({"value": item});
         });
         res.send(json);
     });
 });
 
+// Adds a recommendation to the front of the list and increases its score
 app.post('/recommended/', function(req,res) {
-	var lastRecommendation = req.body.recommendation;
-	// TODO: Validate input from client
-	redis.lpush("recommendations", lastRecommendation, function(err, reply) {
-	    res.send(reply);
-	});
+	var recommendation = req.body.recommendation;  // TODO: Validate input from client
+	redis.lpush("recommendations", recommendation, function(err, reply) {});
+    redis.zincrby("topRecommendations", 1, recommendation, function(err, reply) {});
+    res.send(200, {msg: "Received recommendation"});
 });
 
+// Gets the last received recommendation from the list
 app.get('/recommended/', function(req,res) {
 	redis.lindex("recommendations", 0, function(err, reply) {
 	    res.send(reply);
 	});
 });
 
-app.get('/test.html',function(req, res) {
-	res.sendfile('test.html');
+// Gets the top 10 recommendations by score
+app.get('/topRecommendations/', function(req, res) {
+    redis.zrevrange("topRecommendations", 0, 9, "withscores", function(err, items) {
+        var json = { "topRecommendations": [] };
+        for(var i=0; i < items.length; i+=2)
+            json.topRecommendations.push({"value": items[i], "score": items[i+1]});
+        res.send(json);
+    });
 });
 
 
