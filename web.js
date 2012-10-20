@@ -1,9 +1,39 @@
-// Express initialization
-var express = require('express');
-var app = express.createServer(express.logger());
-app.enable('jsonp callback');
-app.use(express.bodyParser());
+// Includes
+var express		= require('express'),
+	everyauth	= require('everyauth'),
+    util		= require('util');
 
+// TODO: Replace with storage
+var users = {};
+var nextUserId = 0;
+
+// everyauth initialization
+everyauth.twitter
+  .consumerKey(process.env.TWITTER_CONSUMER_KEY)
+  .consumerSecret(process.env.TWITTER_CONSUMER_SECRET)
+  .findOrCreateUser(function (session, accessToken, accessTokenSecret, twitterUser) {
+    return users[twitterUser.id] || (users[twitterUser.id] = twitterUser);
+  })
+  .redirectPath('/');
+
+// Express initialization
+var app = express.createServer(
+	express.logger()
+    , express.bodyParser()
+    , express.cookieParser()
+    , express.session({secret: "x" + process.env.EXPRESS_SESSION_SECRET})
+	, everyauth.middleware()
+);
+app.enable('jsonp callback');
+
+everyauth.everymodule.findUserById(function (userId, callback) {
+    //userModel.findById(userId, callback);
+    var u = users[userId];
+    if(u)
+    	callback(null, u)
+    else
+    	callback("user not found!", null);
+});
 
 // Redis initialization
 if (process.env.REDISTOGO_URL) {
@@ -13,7 +43,6 @@ if (process.env.REDISTOGO_URL) {
 } else {
     var redis = require("redis").createClient();
 }
-
 
 // Routes
 
@@ -53,6 +82,15 @@ app.get('/topRecommendations/', function(req, res) {
     });
 });
 
+// Home page
+app.get('/', function(req, res){
+	//console.log(util.inspect(req.user));
+	// TODO: Create views
+	if(req.loggedIn)
+    	res.send("Hello " + req.user.name);
+    else
+    	res.send("<a href='/auth/twitter'>Login with Twitter</a>");
+});
 
 // Server
 var port = process.env.PORT || 5000;
