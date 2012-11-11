@@ -1,18 +1,17 @@
 // Includes
 var express		= require('express'),
 	everyauth	= require('everyauth'),
-    util		= require('util');
-
-// TODO: Replace with storage
-var users = {};
-var nextUserId = 0;
-
+    util		= require('util'),
+    users       = require('./lib/users');
+    
 // everyauth initialization
 everyauth.twitter
   .consumerKey(process.env.TWITTER_CONSUMER_KEY)
   .consumerSecret(process.env.TWITTER_CONSUMER_SECRET)
   .findOrCreateUser(function (session, accessToken, accessTokenSecret, twitterUser) {
-    return users[twitterUser.id] || (users[twitterUser.id] = twitterUser);
+     var promise = this.Promise();
+     users.findOrCreateByTwitterData(twitterUser, accessToken, accessTokenSecret, promise);
+     return promise;
   })
   .redirectPath('/');
 
@@ -21,18 +20,13 @@ var app = express.createServer(
 	express.logger()
     , express.bodyParser()
     , express.cookieParser()
-    , express.session({secret: "x" + process.env.EXPRESS_SESSION_SECRET})
+    , express.session({secret: process.env.EXPRESS_SESSION_SECRET})
 	, everyauth.middleware()
 );
 app.enable('jsonp callback');
 
 everyauth.everymodule.findUserById(function (userId, callback) {
-    //userModel.findById(userId, callback);
-    var u = users[userId];
-    if(u)
-    	callback(null, u)
-    else
-    	callback("user not found!", null);
+    users.findById(userId, callback);
 });
 
 // Redis initialization
@@ -84,10 +78,8 @@ app.get('/topRecommendations/', function(req, res) {
 
 // Home page
 app.get('/', function(req, res){
-	//console.log(util.inspect(req.user));
-	// TODO: Create views
 	if(req.loggedIn)
-    	res.send("Hello " + req.user.name);
+    	res.send("Hello " +req.user.name);
     else
     	res.send("<a href='/auth/twitter'>Login with Twitter</a>");
 });
