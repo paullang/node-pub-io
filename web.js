@@ -79,7 +79,7 @@ app.get('/topRecommendations/', function(req, res) {
 // Home page
 app.get('/', function(req, res){
 	if(req.loggedIn)
-    	res.send("Hello " +req.user.name);
+    	res.send("Hello " +req.user.name + " <img src=" + req.user.twitterProfileImageUrl + ">");
     else
     	res.send("<a href='/auth/twitter'>Login with Twitter</a>");
 });
