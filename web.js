@@ -1,7 +1,7 @@
 // Includes
-var express		= require('express'),
-	everyauth	= require('everyauth'),
-    util		= require('util'),
+var express	= require('express'),
+    everyauth	= require('everyauth'),
+    util	= require('util'),
     users       = require('./lib/users');
     
 // everyauth initialization
@@ -17,11 +17,11 @@ everyauth.twitter
 
 // Express initialization
 var app = express.createServer(
-	express.logger()
+    express.logger()
     , express.bodyParser()
     , express.cookieParser()
     , express.session({secret: process.env.EXPRESS_SESSION_SECRET})
-	, everyauth.middleware()
+    , everyauth.middleware()
 );
 app.enable('jsonp callback');
 
@@ -76,12 +76,22 @@ app.get('/topRecommendations/', function(req, res) {
     });
 });
 
+// Gets information about the user that is logged in
+app.get('/api/user', function(req, res){
+    console.log('api/user' + req.user);
+    if(req.loggedIn)
+        res.json(req.user);
+    else
+        res.json({});
+ });
+ 
 // Home page
 app.get('/', function(req, res){
-	if(req.loggedIn)
-    	res.send("Hello " +req.user.name);
+    console.log('/');
+    if(req.loggedIn)
+        res.send("Hello " +req.user.name);
     else
-    	res.send("<a href='/auth/twitter'>Login with Twitter</a>");
+        res.send("<a href='/auth/twitter'>Login with Twitter</a>");
 });
 
 // Server
